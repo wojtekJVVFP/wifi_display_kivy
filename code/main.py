@@ -9,10 +9,14 @@ import asyncio
 import websockets
 import json
 import io
-from PIL import Image as ImagePIL
 
 from disp_no import DEVICE_NO, BASE_DISP  #number of current and base display
 from websocket_devices import Ws_devices, devices
+
+from kivy.utils import platform
+if platform == "android":       #thanks to that we can run script also in windows
+    from android.permissions import Permission, request_permissions
+    request_permissions([Permission.INTERNET])
 
 local_device = devices[DEVICE_NO]
 
@@ -23,8 +27,6 @@ class WifiServer(Widget):
     image = ObjectProperty(None)
 
     test = 0
-
-    #__init__
 
     def update(self, dt):
         pass
@@ -59,7 +61,6 @@ class WifiServerApp(App):
     '''
     async def send1(self, websocket):
         async for message in websocket:
-            global image_pil
 
             print('Wiadomość odebrana: {}'.format(message[:30]))
             self.root.label.text = str(message)[:10]
@@ -69,8 +70,6 @@ class WifiServerApp(App):
 
             image_bytesIO = io.BytesIO()
             image_bytesIO.write(image_file_bytes)
-
-            image_base_pil = ImagePIL.open(image_bytesIO)
 
             image_bytesIO.seek(0)   #był niezbędny do prawidłowego zadziałania odczytu
             kivy_image = Image()
