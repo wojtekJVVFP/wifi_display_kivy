@@ -28,7 +28,7 @@ class Ws_devices():
     def return_address(self):
         return 'ws://'+self.ip+':'+self.port_no
 
-
+#'192.168.1.117'
 devices = []
 devices.append(Ws_devices(ip='localhost', name='lokalne', greet='jestem lokalne', isActive = True, resolution = (1000, 1000), dpi = 127, margins = (8,10,8,0)))               #0
 devices.append(Ws_devices(ip='192.168.1.117', name='samsung note 9', greet='jestem note 9', isActive = True, resolution = (1440, 2990), dpi = 514, margins = (3,9,3,6)))   #1

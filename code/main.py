@@ -1,3 +1,6 @@
+__version__ = 0.1
+
+import kivy
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
@@ -13,12 +16,13 @@ import io
 from disp_no import DEVICE_NO, BASE_DISP  #number of current and base display
 from websocket_devices import Ws_devices, devices
 
+local_device = devices[DEVICE_NO]
+
 from kivy.utils import platform
 if platform == "android":       #thanks to that we can run script also in windows
     from android.permissions import Permission, request_permissions
-    request_permissions([Permission.INTERNET])
+    from AndroidGetIP import getIP
 
-local_device = devices[DEVICE_NO]
 
 class WifiServer(Widget):
     # button = ObjectProperty(None)
@@ -36,9 +40,21 @@ class WifiServer(Widget):
 class WifiServerApp(App):
     def build(self):
         server = WifiServer()
-
         Clock.schedule_interval(server.update, 1.0/60.0)
         return server
+    def on_start(self):
+        if platform == "android":  # thanks to that we can run script also in windows
+            def callback(permission, results):
+                if all([res for res in results]):
+                    print("Got all permissions")
+                    ip = getIP()
+                    server.label.text = ip
+                else:
+                    print("Did not get all permissions")
+
+            request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE], callback)
+            # request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE])
+
 
     def app_func(self):
         '''This will run both methods asynchronously and then block until they
@@ -65,6 +81,7 @@ class WifiServerApp(App):
             print('Wiadomość odebrana: {}'.format(message[:30]))
             self.root.label.text = str(message)[:10]
 
+            # Odbiór obrazka i zamiana na postać do wyświetlenia w widgecie image
             image_file_array = json.loads(message)
             image_file_bytes = bytes(image_file_array)
 
@@ -76,8 +93,6 @@ class WifiServerApp(App):
             kivy_image.texture = CoreImage(image_bytesIO, ext="jpg").texture    #gotowy obrazek do wyświetlenia w interfejsie
 
             self.root.image.texture = kivy_image.texture
-
-            #Odbiór obrazka i zamiana na postać do wyświetlenia w widgecie image
 
             return_data_dict = {
                 'data': 'dane',
