@@ -6,11 +6,16 @@ poprzedniego projektu oraz funkcje do wyświetlania odebranego obrazka
 -- zarządzanie ułożeniem widgetów na ekranie
 
 - Jak uruchomić serwer po wystartowaniu aplikacji tak, żeby najpierw pobrać od użytkownika adres IP do inicjalizacji serwera?
-- Może da się pobrać adres IP z urządzenia zamiast pobierać od użytkownika, natomiast w interfejsie wstępnym  pobrać informacji o urządzeniu
-- rekonfiguracja serwera podczas działania
+-- Może da się pobrać adres IP z urządzenia zamiast pobierać od użytkownika, natomiast w interfejsie wstępnym  pobrać informacji o urządzeniu
+- Poprawiać kod do uzyskania uprawnień od użytkownika
+- opóźnić start serwera, powinien się uruchomić po interfejsie, żeby była możliwość pobrania z telefonu adres IP
+
+- rekonfiguracja serwera podczas działania - serwer może być wystartowany na początku jak zostanie pobrany ip
+- może się zdarzyć, że serwer zostanie uruchomiony przed interfejsem i wtedy nie pobierze ip i wystartuje z nieprawidłowym ip
 - zaimplementować screenmanager, drugie okno będzie służyć do wprowadzania ustawień programu i informacji o urządzeniu
 + uruchomić program na android
 - testować na różnych wersjach android
+- 
 
 
 

@@ -9,7 +9,7 @@ from kivy.clock import Clock
 from kivy.uix.image import Image
 from kivy.core.image import Image as CoreImage
 import asyncio
-import websockets
+from websockets.server import serve
 import json
 import io
 
@@ -36,6 +36,12 @@ class WifiServer(Widget):
         pass
         #print('{}'.format(self.test))
         #self.label.text = str(self.test)
+    def reposition(self, *args):
+        self.image.size = (self.size[0] - 100, self.size[1] - 100)
+        self.image.pos = 0,0
+
+        self.button.pos = (0, self.height-self.button.size[1])
+        self.label.pos = self.button.width + 10, self.image.height+10
 
 class WifiServerApp(App):
     def build(self):
@@ -51,10 +57,12 @@ class WifiServerApp(App):
                     server.label.text = ip
                 else:
                     print("Did not get all permissions")
-
             request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE], callback)
             # request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE])
+        print("test on start")
 
+        #x: button1.width + 10
+        #y: image.height+10
 
     def app_func(self):
         '''This will run both methods asynchronously and then block until they
@@ -104,11 +112,16 @@ class WifiServerApp(App):
             await websocket.send(json.dumps(return_data_dict))
 
     async def server_routine(self):
+        print("test server start")
         try:
-            async with websockets.serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
-                await asyncio.Future()  # run forever
+            # async with serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
+            #     await asyncio.Future()  # run forever
+            server = await serve(self.send1, local_device.ip, local_device.port_no, max_size=None)
+            await server.serve_forever()
         except asyncio.CancelledError as e:
             print('UI ended')
+        except OSError as e:
+            print("incorrect IP address")
         finally:
             # when canceled, print that it finished
             print('Done')

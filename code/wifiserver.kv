@@ -2,23 +2,21 @@
     button: button1 #name from py: id from kv file, the name can be the same as id
     label: label1
     image: image
+    on_size: root.reposition()
+    on_pos: root.reposition()
+    #reposition() ustawia poszczególne widgety, klasa wifiServer
 
     Image:
         id: image
-        x: 0
-        y: 0
         source: 'obrazy/linie.jpg'
-        size: (root.size[0]-100, root.size[1]-100)
+
     Button:
         id: button1
         text: 'button'
-        x: 0
-        y: image.height+10
+
     Label:
         id: label1
         text: 'jakies pole'
-        x: button1.width + 10
-        y: image.height+10
 
 
 
