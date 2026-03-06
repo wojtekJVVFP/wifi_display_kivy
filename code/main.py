@@ -19,13 +19,12 @@ from websocket_devices import Ws_devices, devices
 local_device = devices[DEVICE_NO]
 
 from kivy.utils import platform
-if platform == "android":       #thanks to that we can run script also in windows
-    from android.permissions import Permission, request_permissions
+if platform == 'android':       #thanks to that we can run script also in windows
+    from android.permissions import Permission, request_permissions, check_permission
     from AndroidGetIP import getIP
 
 
 class WifiServer(Widget):
-    # button = ObjectProperty(None)
     label = ObjectProperty(None)
     button = ObjectProperty(None)
     image = ObjectProperty(None)
@@ -38,10 +37,20 @@ class WifiServer(Widget):
         #self.label.text = str(self.test)
     def reposition(self, *args):
         self.image.size = (self.size[0] - 100, self.size[1] - 100)
-        self.image.pos = 0,0
+
+        self.image.pos = (0,0)
 
         self.button.pos = (0, self.height-self.button.size[1])
-        self.label.pos = self.button.width + 10, self.image.height+10
+       #self.label.pos = self.button.width + 10, self.image.height+10
+        self.label.pos = (self.button.width, self.height-self.label.size[1])
+
+        self.label.text = 'test'
+        if platform == 'android':  # thanks to that we can run script also in windows
+            ip = getIP()
+            self.label.text = ip
+
+        if platform == 'win':  # thanks to that we can run script also in windows
+            self.label.text = 'win'
 
 class WifiServerApp(App):
     def build(self):
@@ -49,15 +58,14 @@ class WifiServerApp(App):
         Clock.schedule_interval(server.update, 1.0/60.0)
         return server
     def on_start(self):
-        if platform == "android":  # thanks to that we can run script also in windows
+        if platform == 'android':  # thanks to this we can run script also in windows
             def callback(permission, results):
                 if all([res for res in results]):
                     print("Got all permissions")
-                    ip = getIP()
-                    server.label.text = ip
+
                 else:
                     print("Did not get all permissions")
-            request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE], callback)
+            request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE, Permission.ACCESS_NETWORK_STATE], callback)
             # request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE])
         print("test on start")
 
@@ -116,7 +124,10 @@ class WifiServerApp(App):
         try:
             # async with serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
             #     await asyncio.Future()  # run forever
-            server = await serve(self.send1, local_device.ip, local_device.port_no, max_size=None)
+            if platform == 'android':  # thanks to that we can run script also in windows
+                server = await serve(self.send1, getIP(), local_device.port_no, max_size=None) #zamiast IP podanego jednoznacznie pobrano go
+            if platform == 'win':  # thanks to that we can run script also in windows
+                server = await serve(self.send1, local_device.ip, local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
             await server.serve_forever()
         except asyncio.CancelledError as e:
             print('UI ended')

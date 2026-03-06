@@ -26,3 +26,5 @@ poprzedniego projektu oraz funkcje do wyświetlania odebranego obrazka
 
 -debugowanie na emulatorze android studio, dodane kompilowanie także pod platformę X86/X64 do buildozer.spec.
 Uruchamianie na emulatorze X64 będzie wtedy też możliwe, a taki emulator będzie szybszy
+
++uprawnienia działają na emulatorze, tylko aktualne nie wymagają potwierdzenia przez użytkownika

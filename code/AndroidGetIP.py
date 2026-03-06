@@ -15,16 +15,26 @@ def int_to_ip(ipnum):
     # oc3 = 1
     # oc4 = 117
 
-    return "{}.{}.{}.{}".format(oc1,oc2,oc3,oc4)
+    return "{}.{}.{}.{}".format(oc4,oc3,oc2,oc1)
     
 def getIP():
     from jnius import autoclass
-    PythonActivity = autoclass('org.renpy.android.PythonActivity')
+
+    '''PythonActivity = autoclass('org.renpy.android.PythonActivity')
     SystemProperties = autoclass('android.os.SystemProperties')
     Context = autoclass('android.content.Context')
     wifi_manager = PythonActivity.mActivity.getSystemService(Context.WIFI_SERVICE)
     ip = wifi_manager.getConnectionInfo()
-    ip = ip.getIpAddress()
+    ip = ip.getIpAddress()'''
+    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+    WifiManager = autoclass('android.net.wifi.WifiManager')
+
+    activity = PythonActivity.mActivity
+    wifi = activity.getSystemService(activity.WIFI_SERVICE)
+    info = wifi.getConnectionInfo()
+
+    ip = info.getIpAddress()
+
     ip = int_to_ip(int(ip))
     return ip
 if __name__=="__main__":
