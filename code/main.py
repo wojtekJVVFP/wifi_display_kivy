@@ -124,7 +124,7 @@ class WifiServerApp(App):
         try:
             # async with serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
             #     await asyncio.Future()  # run forever
-            if platform == 'android':  # thanks to that we can run script also in windows
+            if platform == 'android':  # thanks to that we can run script also in android
                 server = await serve(self.send1, getIP(), local_device.port_no, max_size=None) #zamiast IP podanego jednoznacznie pobrano go
             if platform == 'win':  # thanks to that we can run script also in windows
                 server = await serve(self.send1, local_device.ip, local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
