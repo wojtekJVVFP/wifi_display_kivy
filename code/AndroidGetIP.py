@@ -17,7 +17,7 @@ def int_to_ip(ipnum):
 
     return "{}.{}.{}.{}".format(oc4,oc3,oc2,oc1)
     
-def getIP():
+def getIP_old():
     from jnius import autoclass
 
     '''PythonActivity = autoclass('org.renpy.android.PythonActivity')
@@ -37,5 +37,16 @@ def getIP():
 
     ip = int_to_ip(int(ip))
     return ip
+
+def getIP():
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))  # nic nie jest wysyłane
+        return s.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        s.close()
 if __name__=="__main__":
-    getIP()
+    print(getIP())

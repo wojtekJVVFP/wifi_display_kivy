@@ -120,6 +120,7 @@ class WifiServerApp(App):
             await websocket.send(json.dumps(return_data_dict))
 
     async def server_routine(self):
+        from AndroidGetIP import getIP
         print("test server start")
         try:
             # async with serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
@@ -127,7 +128,7 @@ class WifiServerApp(App):
             if platform == 'android':  # thanks to that we can run script also in android
                 server = await serve(self.send1, getIP(), local_device.port_no, max_size=None) #zamiast IP podanego jednoznacznie pobrano go
             if platform == 'win':  # thanks to that we can run script also in windows
-                server = await serve(self.send1, local_device.ip, local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
+                server = await serve(self.send1, getIP(), local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
             await server.serve_forever()
         except asyncio.CancelledError as e:
             print('UI ended')

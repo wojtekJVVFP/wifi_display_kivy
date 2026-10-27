@@ -14,7 +14,7 @@ poprzedniego projektu oraz funkcje do wyświetlania odebranego obrazka
 * zaimplementować screenmanager, drugie okno będzie służyć do wprowadzania ustawień programu i informacji o urządzeniu
 * uruchomić program na android
 * testować na różnych wersjach android
-* 
+* pobieranie z telefonu informacji o jego wyświetlaczu (rozdzielczość, gęstość piksele/cal)
 
 
 
