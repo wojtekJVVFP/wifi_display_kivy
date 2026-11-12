@@ -1,26 +1,33 @@
+#:kivy 1.0
+
 <WifiServer>:
     button: button1 #name from py: id from kv file, the name can be the same as id
     label: label1
     image: image
+
     on_size: root.reposition()
     on_pos: root.reposition()
 
-    Image:
-        id: image
-        source: 'obrazy/linie.jpg'
-        size_hint: (0,0)
-        pos_hint: (0,0)
+    FloatLayout:
+        Image:
+            id: image
+            source: 'obrazy/linie.jpg'
+            size_hint: (0.4,1)
+            pos: (0, 0)
 
-    Button:
-        id: button1
-        text: 'button'
-        size_hint: (0,0)
-        pos_hint: (0,0)
+        Button:
+            id: button1
+            text: 'button'
+            size_hint: (0.2,1)
+            pos: (800, 0)
 
-    Label:
-        id: label1
-        size_hint: (0,0)
-        pos_hint: (0,0)
+
+        Label:
+            id: label1
+            text: 'dumbo'
+            size_hint: (0.1,1)
+            pos: (1000, 0)
+
 
 
 

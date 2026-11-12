@@ -6,6 +6,8 @@ from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
+from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.core.image import Image as CoreImage
 import asyncio
@@ -24,7 +26,7 @@ if platform == 'android':       #thanks to that we can run script also in window
     from AndroidGetIP import getIP
 
 
-class WifiServer(Widget):
+class WifiServer(Screen):
     label = ObjectProperty(None)
     button = ObjectProperty(None)
     image = ObjectProperty(None)
@@ -54,9 +56,10 @@ class WifiServer(Widget):
 
 class WifiServerApp(App):
     def build(self):
-        server = WifiServer()
-        Clock.schedule_interval(server.update, 1.0/60.0)
-        return server
+        sm = ScreenManager()
+        sm.add_widget(WifiServer(name='server'))
+        Clock.schedule_interval(sm.get_screen('server').update, 1.0/60.0)
+        return sm
     def on_start(self):
         if platform == 'android':  # thanks to this we can run script also in windows
             def callback(permission, results):
