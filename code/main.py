@@ -1,4 +1,5 @@
 __version__ = 0.1
+# jak przechwycić wciśnięcie klawisza?
 
 import kivy
 from kivy.app import App
@@ -8,6 +9,7 @@ from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.floatlayout import FloatLayout
+from kivy.core.window import Window
 from kivy.uix.image import Image
 from kivy.core.image import Image as CoreImage
 import asyncio
@@ -26,7 +28,7 @@ if platform == 'android':       #thanks to that we can run script also in window
     from AndroidGetIP import getIP
 
 
-class WifiServer(Screen):
+class ImageScr(Screen):
     label = ObjectProperty(None)
     button = ObjectProperty(None)
     image = ObjectProperty(None)
@@ -54,12 +56,25 @@ class WifiServer(Screen):
         if platform == 'win':  # thanks to that we can run script also in windows
             self.label.text = 'win'
 
+
+class SettingsScr(Screen):
+    pass
+
+
 class WifiServerApp(App):
     def build(self):
+        Window.bind(on_keyboard=self.on_back_key)
         sm = ScreenManager()
-        sm.add_widget(WifiServer(name='server'))
-        Clock.schedule_interval(sm.get_screen('server').update, 1.0/60.0)
+        sm.add_widget(ImageScr(name='imageScreen'))
+        sm.add_widget(SettingsScr(name='settingsScreen'))
+        Clock.schedule_interval(sm.get_screen('imageScreen').update, 1.0/60.0)
         return sm
+
+    def on_back_key(self, window, key, scancode, codepoint, modifier):
+        if key == 27:
+            App().get_running_app().stop()
+            return True
+        return False
     def on_start(self):
         if platform == 'android':  # thanks to this we can run script also in windows
             def callback(permission, results):
@@ -98,7 +113,7 @@ class WifiServerApp(App):
         async for message in websocket:
 
             print('Wiadomość odebrana: {}'.format(message[:30]))
-            self.root.label.text = str(message)[:10]
+            self.root.get_screen('imageScreen').label.text = str(message)[:10]
 
             # Odbiór obrazka i zamiana na postać do wyświetlenia w widgecie image
             image_file_array = json.loads(message)
@@ -111,7 +126,7 @@ class WifiServerApp(App):
             kivy_image = Image()
             kivy_image.texture = CoreImage(image_bytesIO, ext="jpg").texture    #gotowy obrazek do wyświetlenia w interfejsie
 
-            self.root.image.texture = kivy_image.texture
+            self.root.get_screen('imageScreen').image.texture = kivy_image.texture
 
             return_data_dict = {
                 'data': 'dane',
@@ -124,6 +139,7 @@ class WifiServerApp(App):
 
     async def server_routine(self):
         from AndroidGetIP import getIP
+
         print("test server start")
         try:
             # async with serve(self.send1, local_device.ip, local_device.port_no, max_size=None):
@@ -131,7 +147,7 @@ class WifiServerApp(App):
             if platform == 'android':  # thanks to that we can run script also in android
                 server = await serve(self.send1, getIP(), local_device.port_no, max_size=None) #zamiast IP podanego jednoznacznie pobrano go
             if platform == 'win':  # thanks to that we can run script also in windows
-                server = await serve(self.send1, getIP(), local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
+                server = await serve(self.send1, 'localhost', local_device.port_no, max_size=None)  # dla windows adres ip podany jest bezpośrednio
             await server.serve_forever()
         except asyncio.CancelledError as e:
             print('UI ended')
