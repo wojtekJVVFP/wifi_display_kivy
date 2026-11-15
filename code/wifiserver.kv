@@ -1,51 +1,53 @@
 #:kivy 1.0
 
 <ImageScr>:
-    button: button1 #name from py: id from kv file, the name can be the same as id
-    label: label1
     image: image
 
-    on_size: root.reposition()
-    on_pos: root.reposition()
-
     FloatLayout:
-        Button:
-            id: button1
-            text: 'button'
-            size_hint: (0.1,0.2)
-            pos: (0, self.parent.top-self.height) # top to alias na self.parent(y+height)
         Image:
             id: image
             fit_mode: 'contain' # fill rozciąga do rozmiaru widżetu,contain zmienia rozmiar zachowując jednocześnie proporcje obrazu
             source: 'obrazy/linie.jpg'
-            size_hint: (1,0.8)
-            pos: (button1.x,button1.y-self.height)
-
-        Label:
-            id: label1
-            text: 'dumbo'
-            size_hint: (0.1,0.2)
-            pos: (button1.x+button1.width, button1.y)
-        Button:
-            text: 'settings'
-            size_hint: (0.1,0.2)
-            pos: (0, 0)
-            on_press:
+            size_hint: (1,1)
+            on_touch_down:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'settingsScreen'
 
 <SettingsScr>:
+    button: button1 #name from py: id from kv file, the name can be the same as id
+    ip_address: ip_address
+    display_res: display_res
+    display_dpi: display_dpi
+    on_size: root.reposition()
+    on_pos: root.reposition()
+
     GridLayout:
         cols: 2
         Label:
-            text: 'nazwa'
+            text: 'IP address: '
+        Label:
+            id: ip_address
+            text: 'N/A'
+        Label:
+            text: 'display res x, y: '
+        Label:
+            id: display_res
+            text: 'N/A'
+        Label:
+            text: 'display dpi x,y: '
+        Label:
+            id: display_dpi
+            text: 'N/A'
         Button:
             text: 'image screen'
             on_press:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'imageScreen'
         Button:
-            text: 'end'
+            id: button1
+            text: 'button'
+        Button:
+            text: 'End app'
             on_press: app.stop()
 
 

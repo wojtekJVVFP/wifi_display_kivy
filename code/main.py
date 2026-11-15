@@ -16,21 +16,21 @@ import asyncio
 from websockets.server import serve
 import json
 import io
+from AndroidGetIP import getIP
+from websocket_devices import Ws_devices
 
 from disp_no import DEVICE_NO, BASE_DISP  #number of current and base display
 from websocket_devices import Ws_devices, devices
 
-local_device = devices[DEVICE_NO]
+local_device = Ws_devices(ip='localhost', name='lokalne', greet='jestem lokalne', isActive = True, resolution = (1000, 1000), dpi = 127, margins = (8,10,8,0))
 
 from kivy.utils import platform
 if platform == 'android':       #thanks to that we can run script also in windows
     from android.permissions import Permission, request_permissions, check_permission
-    from AndroidGetIP import getIP
+    from jnius import autoclass
 
 
 class ImageScr(Screen):
-    label = ObjectProperty(None)
-    button = ObjectProperty(None)
     image = ObjectProperty(None)
 
     test = 0
@@ -39,36 +39,63 @@ class ImageScr(Screen):
         pass
         #print('{}'.format(self.test))
         #self.label.text = str(self.test)
-    def reposition(self, *args):
-        self.image.size = (self.size[0] - 100, self.size[1] - 100)
-
-        self.image.pos = (0,0)
-
-        self.button.pos = (0, self.height-self.button.size[1])
-       #self.label.pos = self.button.width + 10, self.image.height+10
-        self.label.pos = (self.button.width, self.height-self.label.size[1])
-
-        self.label.text = 'test'
-        if platform == 'android':  # thanks to that we can run script also in windows
-            ip = getIP()
-            self.label.text = ip
-
-        if platform == 'win':  # thanks to that we can run script also in windows
-            self.label.text = 'win'
 
 
 class SettingsScr(Screen):
-    pass
+    button = ObjectProperty(None)
+    ip_address = ObjectProperty(None)
+    display_res = ObjectProperty(None)
+    display_dpi = ObjectProperty(None)
+
+    def reposition(self, *args):
+        pass
+
+#Ws_devices(ip='localhost', name='lokalne', greet='jestem lokalne', isActive = True, resolution = (1000, 1000), dpi = 127, margins = (8,10,8,0))
+    def get_device_data(self, ):  # mostly written with claude AI
+        ip = getIP()
+        if platform == 'android':  # python autoclass is only available in android builds
+            self.ip_address.text = f"{ip}"
+
+            PythonActivity = autoclass('org.kivy.android.PythonActivity')
+
+            # getting phone display data
+            activity = PythonActivity.mActivity
+            metrics = activity.getResources().getDisplayMetrics()
+            width_px = metrics.widthPixels  # width in px
+            height_px = metrics.heightPixels  # height in px
+            density = metrics.density  # scale coeficcient (1.0 = 160 dpi, 2.0 = 320 dpi...)
+            dpi = metrics.densityDpi  # "logical" dpi (np. 240, 320, 420, 480)
+            xdpi = metrics.xdpi  # physical dpi horizontal
+            ydpi = metrics.ydpi  # physical dpi vertical
+
+            # getting device name
+            Build = autoclass('android.os.Build')
+            Settings = autoclass('android.provider.Settings$Global')
+            resolver = PythonActivity.mActivity.getContentResolver()
+            name = Settings.getString(resolver, 'device_name')   # name of the phone working in android 7.1+
+            if not name:  # if name is None - empty
+                name = f'{Build.MANUFACTURER} {Build.MODEL}'.title()
+
+            self.display_res.text = f"{width_px}, {height_px}"
+            self.display_dpi.text = f"{xdpi}, {ydpi}"
+
+            local_device.ip = ip
+            local_device.name = name
+            local_device.resolution = (width_px, height_px)
+            local_device.dpi = int((xdpi + ydpi) / 2)  # average dpi of the screen
+
+        if platform == 'win':  # thanks to that we can run script also in windows
+            self.ip_address.text = f"{ip}"
 
 
 class WifiServerApp(App):
+    sm = ScreenManager()
     def build(self):
         Window.bind(on_keyboard=self.on_back_key)
-        sm = ScreenManager()
-        sm.add_widget(ImageScr(name='imageScreen'))
-        sm.add_widget(SettingsScr(name='settingsScreen'))
-        Clock.schedule_interval(sm.get_screen('imageScreen').update, 1.0/60.0)
-        return sm
+        self.sm.add_widget(ImageScr(name='imageScreen'))
+        self.sm.add_widget(SettingsScr(name='settingsScreen'))
+        Clock.schedule_interval(self.sm.get_screen('imageScreen').update, 1.0/60.0)
+        return self.sm
 
     def on_back_key(self, window, key, scancode, codepoint, modifier):
         if key == 27:
@@ -76,7 +103,8 @@ class WifiServerApp(App):
             return True
         return False
     def on_start(self):
-        if platform == 'android':  # thanks to this we can run script also in windows
+        self.sm.get_screen('settingsScreen').get_device_data()  # getting device information
+        if platform == 'android':  # with this we can run script also in windows
             def callback(permission, results):
                 if all([res for res in results]):
                     print("Got all permissions")
@@ -86,9 +114,6 @@ class WifiServerApp(App):
             request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE, Permission.ACCESS_NETWORK_STATE], callback)
             # request_permissions([Permission.INTERNET, Permission.ACCESS_WIFI_STATE])
         print("test on start")
-
-        #x: button1.width + 10
-        #y: image.height+10
 
     def app_func(self):
         '''This will run both methods asynchronously and then block until they
@@ -113,7 +138,6 @@ class WifiServerApp(App):
         async for message in websocket:
 
             print('Wiadomość odebrana: {}'.format(message[:30]))
-            self.root.get_screen('imageScreen').label.text = str(message)[:10]
 
             # Odbiór obrazka i zamiana na postać do wyświetlenia w widgecie image
             image_file_array = json.loads(message)
@@ -129,11 +153,11 @@ class WifiServerApp(App):
             self.root.get_screen('imageScreen').image.texture = kivy_image.texture
 
             return_data_dict = {
-                'data': 'dane',
-                'width': 10,
-                'height': 20,
-                'window_width': 30,
-                'window_height': 40
+                'name': local_device.name,
+                'width_px': local_device.resolution[0],
+                'height_px': local_device.resolution[1],
+                'dpi': local_device.dpi,
+                'ip_address': local_device.ip
             }
             await websocket.send(json.dumps(return_data_dict))
 

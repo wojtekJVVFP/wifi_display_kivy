@@ -20,7 +20,8 @@ class Ws_devices():
         self.greet = greet
         self.port_no = '8765' # można zmienić numer portu dla danego urządzenia jeśli jest inny
         self.isActive = isActive
-        #self.resolution = resolution # tuple (szer, wys), szerokość mniejsza
+        self.resolution = resolution
+        self.dpi = dpi
         self.disp_data = Disp_data(resolution, dpi, margins)
     def calc_margins(self, base_disp: Disp_data):
         for i in self.disp_data.margins:

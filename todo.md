@@ -1,3 +1,6 @@
+- do poprawienia wyświetlanie adresu IP w apce
+- dodać wersję apki do ekranu settings
+
 +do napisania kod do wyświetlania odebranej wiadomości w UI
 
 +napisać odbiór wiadomości po stronie i wyświetlanie obrazka.Potrzebne są niektóre funkcje z
